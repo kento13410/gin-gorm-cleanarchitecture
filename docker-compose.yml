@@ -17,4 +17,4 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: "#kK36238708#"
-      MYSQL_DATABASE: sakila
+      MYSQL_DATABASE: goapp

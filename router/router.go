@@ -1,13 +1,15 @@
 package router
 
 import (
+	"go-gin-gorm-example/controller"
+
 	"github.com/gin-gonic/gin"
-	
-	"github.com/kento13410/gin-gorm-cleanarchitecture/controller"
 )
 
-func NewRouter() {
+func NewRouter(uc controller.IUserController) {
 	r := gin.Default()
+	
+	r.POST("/signup", uc.SignUp)
 
-	r.POST("/signup", controller.Signup)
+	r.Run(":8081")
 }
