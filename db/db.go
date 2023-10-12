@@ -1,12 +1,21 @@
 package db
 
-import "github.com/jinzhu/gorm"
+import (
+	"os"
+
+	"github.com/jinzhu/gorm"
+	"github.com/joho/godotenv"
+)
 
 func DBOpen() *gorm.DB {
-	USER := "root"
-	PASS := "#kK36238708#"
-	PROTOCOL := "tcp(db:3306)"
-	DBNAME := "goapp"
+	if err := godotenv.Load(".env"); err != nil {
+		panic(err)
+	}
+	USER := os.Getenv("USER")
+	PASS := os.Getenv("PASS")
+	PROTOCOL := os.Getenv("PROTOCOL")
+	DBNAME := os.Getenv("DBNAME")
+
 	CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME
 	db, err := gorm.Open("mysql", CONNECT)
 	if err != nil {
