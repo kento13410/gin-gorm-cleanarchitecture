@@ -1,59 +1,22 @@
 package main
 
 import (
-	"net/http"
+	"go-gin-gorm-example/controller"
+	"go-gin-gorm-example/db"
+	"go-gin-gorm-example/models"
+	"go-gin-gorm-example/repository"
+	"go-gin-gorm-example/router"
+	"go-gin-gorm-example/usecase"
 
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-type Actor struct {
-	FirstName	string `gorm:"column:first_name" json:"first_name"`
-	LastName	string `gorm:"column:last_name" json:"last_name"`
-}
-
-func (Actor) TableName() string {
-	return "actor"
-}
-
 func main() {
-	// GET, POST, QueryParameter
-    r := gin.Default()
-    
-	db := gormConnect()
-	defer db.Close()
-
-    r.GET("actor/:name", func(ctx *gin.Context){
-		query := ctx.Param("name")
-		actor := searchActor(ctx, db, query)
-		ctx.JSON(http.StatusOK, actor)
-	})
-
-	r.GET("actor", func(ctx *gin.Context){
-		actor := []Actor{}
-		ctx.JSON(http.StatusOK, db.Limit(3).Find(&actor))
-	})
-	
-	r.Run(":8081")
-}
-
-func searchActor(ctx *gin.Context, db *gorm.DB, actorName string) Actor {
-	fullnameActor := Actor{}
-	db.Where("first_name = ?", actorName).First(&fullnameActor)
-	return fullnameActor
-}
-
-func gormConnect() *gorm.DB {
-	USER := "root"
-	PASS := "#kK36238708#"
-	PROTOCOL := "tcp(db:3306)"
-	DBNAME := "sakila"
-	CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME
-	db, err := gorm.Open("mysql", CONNECT)
-	if err != nil {
-		panic(err)
-	}
-
-	return db
+	DB := db.DBOpen()
+	defer db.DBClose(DB)
+	DB.AutoMigrate(models.User{})
+	ur := repository.NewUserRepository(DB)
+	uuc := usecase.NewUserUsecase(ur)
+	uc := controller.NewUserController(uuc)
+	router.NewRouter(uc)
 }

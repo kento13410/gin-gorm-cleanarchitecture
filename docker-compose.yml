@@ -3,9 +3,7 @@ version: "3.8"
 services:
   go:
     container_name: go
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - "8081:8081"
     depends_on:
@@ -17,4 +15,4 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: "#kK36238708#"
-      MYSQL_DATABASE: sakila
+      MYSQL_DATABASE: goapp
