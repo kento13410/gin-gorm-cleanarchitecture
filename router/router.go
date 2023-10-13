@@ -10,6 +10,7 @@ func NewRouter(uc controller.IUserController) {
 	r := gin.Default()
 	
 	r.POST("/signup", uc.SignUp)
+	r.POST("/login", uc.LogIn)
 
 	r.Run(":8081")
 }

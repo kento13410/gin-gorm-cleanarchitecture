@@ -10,6 +10,7 @@ import (
 
 type IUserController interface {
 	SignUp(c *gin.Context)
+	LogIn(c *gin.Context)
 }
 
 type UserController struct {
@@ -31,4 +32,14 @@ func (uc *UserController) SignUp(c *gin.Context) {
 	}
 
 	uc.uu.SignUp(c, user)
+}
+
+func (uc *UserController) LogIn(c *gin.Context) {
+	user := models.User{}
+	if err := c.Bind(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":err.Error(),
+		})
+	}
+	uc.uu.LogIn(c, user)
 }

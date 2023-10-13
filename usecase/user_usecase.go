@@ -11,6 +11,7 @@ import (
 
 type IUserUsecase interface {
 	SignUp(c *gin.Context, user models.User)
+	LogIn(c *gin.Context, user models.User)
 }
 
 type UserUsecase struct {
@@ -37,6 +38,25 @@ func (uu *UserUsecase) SignUp(c *gin.Context, user models.User) {
 	}); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":err.Error(),
+		})
+	}
+}
+
+func (uu *UserUsecase) LogIn(c *gin.Context, user models.User) {
+	hashedPass, err := uu.ur.FindUser(c, user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":err.Error(),
+		})
+	}
+	
+	if err := bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(user.Password)); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message":"login completed!",
 		})
 	}
 }
