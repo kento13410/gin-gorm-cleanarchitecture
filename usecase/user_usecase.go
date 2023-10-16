@@ -4,10 +4,12 @@ import (
 	"go-gin-gorm-example/models"
 	"go-gin-gorm-example/repository"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -62,12 +64,15 @@ func (uu *UserUsecase) LogIn(c *gin.Context, user models.User) string {
 		})
 	}
 
+	if err := godotenv.Load(".env"); err != nil {
+		panic(err)
+	}
 	claims := jwt.MapClaims{
 		"user_id": newUser.ID,
 		"exp": time.Now().Add(24 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString("key")
+	tokenString, err := token.SignedString(os.Getenv("JWT_KEY"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":err.Error(),
