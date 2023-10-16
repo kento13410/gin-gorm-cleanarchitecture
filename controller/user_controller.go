@@ -11,6 +11,7 @@ import (
 type IUserController interface {
 	SignUp(c *gin.Context)
 	LogIn(c *gin.Context)
+	LogOut(c *gin.Context)
 }
 
 type UserController struct {
@@ -41,5 +42,12 @@ func (uc *UserController) LogIn(c *gin.Context) {
 			"error":err.Error(),
 		})
 	}
-	uc.uu.LogIn(c, user)
+	c.SetCookie("user", uc.uu.LogIn(c, user), 24, "/", "localhost", false, true)
+}
+
+func (uc *UserController) LogOut(c *gin.Context) {
+	c.SetCookie("user", "", -1, "/", "localhost", false, false)
+	c.JSON(http.StatusOK, gin.H{
+		"message":"logout completed!",
+	})
 }

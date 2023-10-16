@@ -11,6 +11,7 @@ func NewRouter(uc controller.IUserController) {
 	
 	r.POST("/signup", uc.SignUp)
 	r.POST("/login", uc.LogIn)
+	r.POST("/logout", uc.LogOut)
 
 	r.Run(":8081")
 }

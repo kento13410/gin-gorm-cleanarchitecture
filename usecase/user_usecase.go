@@ -4,14 +4,16 @@ import (
 	"go-gin-gorm-example/models"
 	"go-gin-gorm-example/repository"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type IUserUsecase interface {
 	SignUp(c *gin.Context, user models.User)
-	LogIn(c *gin.Context, user models.User)
+	LogIn(c *gin.Context, user models.User) string
 }
 
 type UserUsecase struct {
@@ -42,15 +44,15 @@ func (uu *UserUsecase) SignUp(c *gin.Context, user models.User) {
 	}
 }
 
-func (uu *UserUsecase) LogIn(c *gin.Context, user models.User) {
-	hashedPass, err := uu.ur.FindUser(c, user)
+func (uu *UserUsecase) LogIn(c *gin.Context, user models.User) string {
+	newUser, err := uu.ur.FindUser(c, user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":err.Error(),
 		})
 	}
 	
-	if err := bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(user.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(newUser.Password), []byte(user.Password)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":err.Error(),
 		})
@@ -59,4 +61,18 @@ func (uu *UserUsecase) LogIn(c *gin.Context, user models.User) {
 			"message":"login completed!",
 		})
 	}
+
+	claims := jwt.MapClaims{
+		"user_id": newUser.ID,
+		"exp": time.Now().Add(24 * time.Hour).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString("key")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":err.Error(),
+		})
+	}
+
+	return tokenString
 }
