@@ -28,7 +28,7 @@ func (uc *UserController) SignUp(c *gin.Context) {
 	user := models.User{}
 	if err := c.Bind(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error":err.Error(),
+			"error": err.Error(),
 		})
 	}
 
@@ -39,15 +39,25 @@ func (uc *UserController) LogIn(c *gin.Context) {
 	user := models.User{}
 	if err := c.Bind(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error":err.Error(),
+			"error": err.Error(),
 		})
 	}
-	c.SetCookie("user", uc.uu.LogIn(c, user), 24, "/", "localhost", false, true)
+	value, err := uc.uu.LogIn(c, user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "login completed!",
+		})
+	}
+	c.SetCookie("user", value, 24, "/", "localhost", false, true)
 }
 
 func (uc *UserController) LogOut(c *gin.Context) {
 	c.SetCookie("user", "", -1, "/", "localhost", false, false)
 	c.JSON(http.StatusOK, gin.H{
-		"message":"logout completed!",
+		"message": "logout completed!",
 	})
 }
