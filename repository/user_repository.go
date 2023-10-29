@@ -9,6 +9,7 @@ import (
 
 type IUserRepository interface {
 	AddUser(c *gin.Context, user models.User) error
+	FindUser(c *gin.Context, user models.User) (models.User, error)
 }
 
 type UserRepository struct {
@@ -26,4 +27,12 @@ func (ur *UserRepository) AddUser(c *gin.Context, user models.User) error {
 		return err
 	}
 	return nil
+}
+
+func (ur *UserRepository) FindUser(c *gin.Context, user models.User) (models.User, error) {
+	newUser := models.User{}
+	if err := ur.db.Select("id, name, password").Where("mail = ?", user.Mail).First(&newUser).Error; err != nil {
+		return models.User{}, err
+	}
+	return newUser, nil
 }
